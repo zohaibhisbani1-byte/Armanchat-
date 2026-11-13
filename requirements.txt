@@ -1,0 +1,9 @@
+kivy==2.3.0
+requests==2.32.3
+urllib3==2.2.3
+certifi==2024.8.30
+chardet==5.2.0
+idna==3.10
+pillow==10.4.0
+plyer==2.1.0
+pyjnius==1.6.1
