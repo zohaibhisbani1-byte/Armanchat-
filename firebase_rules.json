@@ -1,0 +1,115 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "admins": {
+      ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)",
+      ".write": false
+    },
+
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)",
+        "blocked": {
+          ".write": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)"
+        },
+        "is_admin": {
+          ".write": false
+        }
+      }
+    },
+
+    "user_blocks": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null && (data.child('participants').child(auth.uid).val() === true || auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && ((!data.exists() && newData.child('participants').child(auth.uid).val() === true) || data.child('participants').child(auth.uid).val() === true || auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)",
+        "messages": {
+          "$msgId": {
+            ".validate": "newData.hasChildren(['sender_id', 'timestamp']) || !newData.exists()"
+          }
+        }
+      }
+    },
+
+    "user_chats": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$chatId": {
+          ".write": "auth != null && (auth.uid === $uid || root.child('chats').child($chatId).child('participants').child(auth.uid).val() === true)"
+        }
+      }
+    },
+
+    "groups": {
+      ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)",
+      "$groupId": {
+        ".read": "auth != null && (data.child('members').child(auth.uid).val() === true || auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && ((!data.exists() && newData.child('created_by').val() === auth.uid) || data.child('members').child(auth.uid).val() === true || auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)"
+      }
+    },
+
+    "user_groups": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$groupId": {
+          ".write": "auth != null && (auth.uid === $uid || root.child('groups').child($groupId).child('members').child(auth.uid).val() === true)"
+        }
+      }
+    },
+
+    "typing": {
+      "$roomId": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+
+    "calls": {
+      "$callId": {
+        ".read": "auth != null && (data.child('caller_id').val() === auth.uid || data.child('callee_id').val() === auth.uid)",
+        ".write": "auth != null && ((!data.exists() && newData.child('caller_id').val() === auth.uid) || data.child('caller_id').val() === auth.uid || data.child('callee_id').val() === auth.uid)"
+      }
+    },
+
+    "incoming_calls": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$callId": {
+          ".write": "auth != null && (auth.uid === $uid || newData.child('caller_id').val() === auth.uid || !newData.exists())"
+        }
+      }
+    },
+
+    "call_history": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "reports": {
+      ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)",
+      "$reportId": {
+        ".write": "auth != null && ((!data.exists() && newData.child('reporter_id').val() === auth.uid) || auth.token.admin === true || root.child('admins').child(auth.uid).val() === true)"
+      }
+    },
+
+    "notifications_queue": {
+      ".read": false,
+      "$notifId": {
+        ".write": "auth != null && newData.child('sender_id').val() === auth.uid"
+      }
+    }
+  }
+}

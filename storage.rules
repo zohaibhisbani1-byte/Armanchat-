@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // User profile avatars: anyone signed in can read, only owner can upload <= 5MB images
+    match /avatars/{uid}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Chat media and attachments: signed-in users can upload <= 20MB files
+    match /chat_media/{roomId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 20 * 1024 * 1024;
+    }
+  }
+}
